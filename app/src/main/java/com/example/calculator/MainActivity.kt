@@ -137,12 +137,12 @@ class MainActivity : AppCompatActivity() {
                     firstIndex = 0
                     lastIndex = backText.length
                     back@ for (j in i + 1..backText.lastIndex)
-                        if (backText[j] !in '0'..'9') {
+                        if (backText[j] !in '0'..'9' && backText[j] != '.') {
                             lastIndex = j
                             break@back
                         }
                     front@ for (j in i - 1 downTo 0)
-                        if (backText[j] !in '0'..'9') {
+                        if (backText[j] !in '0'..'9' && backText[j] != '.') {
                             firstIndex = j + 1
                             break@front
                         }
@@ -165,10 +165,12 @@ class MainActivity : AppCompatActivity() {
         var curr = 0F
         val i = 0
         var str = backText.substring(first, last) + " "
+        println("str$str")
         while (str[i] in '0'..'9' || str[i] == '.') {
             cache += str[i]
             str = str.substring(i + 1)
         }
+        println(cache)
         curr += cache.toFloat()
         cache = ""
 

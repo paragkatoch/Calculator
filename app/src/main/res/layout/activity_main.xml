@@ -193,12 +193,12 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="25dp"
         android:background="#2B2828"
-        android:textSize="40sp"
-        android:textColor="#FFFF"
+        android:gravity="end"
         android:textAlignment="viewEnd"
+        android:textColor="#FFFF"
+        android:textSize="40sp"
         app:layout_constraintBottom_toTopOf="@+id/percent"
-        tools:layout_editor_absoluteX="3dp"
-        android:gravity="end" />
+        tools:layout_editor_absoluteX="1dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

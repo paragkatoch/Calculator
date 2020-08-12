@@ -13,15 +13,14 @@ import com.example.calculator.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    // Background control strings
-    private var cache: String = ""
-    private var backText: String = ""
+    private var cache: String = ""            //equation control string
+    private var backText: String = ""         //background string
     private var zero = false
+    private var equal = false
 
     // OnCreate Method
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //setContentView(R.layout.activity_main)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         // Setting initial output as zero
         update("0")
@@ -33,7 +32,9 @@ class MainActivity : AppCompatActivity() {
     // Method to create reference to buttons and set their actions
     private fun setButtons() {
         binding.apply {
-            val number: List<View> = listOf(zero,one,two,three,four,five,six,seven,eight,nine,dot,clear,back,divide,plus,minus,multiply,percent)
+            val number: List<View> = listOf(zero, one, two, three, four, five, six, seven, eight,
+                nine, dot, clear, back, divide, plus, minus, multiply, percent)
+
             for (item in number) {
                 // call to update the TextView
                 item.setOnClickListener {
@@ -41,11 +42,11 @@ class MainActivity : AppCompatActivity() {
                     vibrate()
                 }
             }
-
             // call to calculate the result
             equals.setOnClickListener {
                 calculate()
                 vibrate()
+                equal = true
             }
         }
     }
@@ -55,38 +56,44 @@ class MainActivity : AppCompatActivity() {
 
         if (backText[0] == '0' && !zero) backText = ""
         when (view.id) {
-            R.id.one -> backText += "1"
-            R.id.two -> backText += "2"
-            R.id.three -> backText += "3"
-            R.id.four -> backText += "4"
-            R.id.five -> backText += "5"
-            R.id.six -> backText += "6"
-            R.id.seven -> backText += "7"
-            R.id.eight -> backText += "8"
-            R.id.nine -> backText += "9"
-            R.id.zero -> { backText += "0"}
+            R.id.one -> digits("1")
+            R.id.two -> digits("2")
+            R.id.three -> digits("3")
+            R.id.four -> digits("4")
+            R.id.five -> digits("5")
+            R.id.six -> digits("6")
+            R.id.seven -> digits("7")
+            R.id.eight -> digits("8")
+            R.id.nine -> digits("9")
+            R.id.zero -> digits("0")
             R.id.divide -> operator('÷')
             R.id.plus -> operator('+')
             R.id.minus -> operator('-')
             R.id.multiply -> operator('×')
             R.id.back -> {
                 if (backText != "") backText = backText.substring(0, backText.length - 1)
-                if (backText.isEmpty()) {backText = "0"; zero = false}
+                if (backText.isEmpty()) {
+                    backText = "0"; zero = false
+                }
+            }
+            R.id.clear -> {
+                backText = "0"; zero = false
             }
             R.id.dot -> {
-                if(backText.isEmpty() || backText[backText.lastIndex] !in '0'..'9') {zero = true;backText +="0"}
+                if (backText.isEmpty() || backText[backText.lastIndex] !in '0'..'9') {
+                    zero = true
+                    backText += "0"
+                }
                 if (backText != "") {
-                    dot@for(i in backText.lastIndex downTo 0)
+                    dot@ for (i in backText.lastIndex downTo 0)
                         if (backText[i] !in '0'..'9') {
                             if (backText[i] != '.')
                                 backText += "."
                             break@dot
-                        }
-                        else if (i == 0)
+                        } else if (i == 0)
                             backText += "."
                 }
             }
-            R.id.clear -> { backText = "0"; zero = false}
             R.id.percent -> {
                 if (backText == "")
                     backText = "0"
@@ -94,21 +101,22 @@ class MainActivity : AppCompatActivity() {
                 backText = (backText.toFloat() / 100).toString()
             }
         }
-        // updates the TextView
+        equal = false
+        // updates the screen
         update()
     }
-
-    // Method to put button on vibrate when clicked
-    private fun vibrate() {
-        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        vibrator.vibrate(30)
+    //Method to handle digit related tasks
+    private fun digits(c: String) {
+        backText += c
+        if (equal)
+            backText = c
     }
 
     // Method to handle operator related tasks
     private fun operator(sym: Char) {
-        if (backText == "") {
-            println("back $backText back");backText += "0"
-        } else if (sym != backText.last()) {
+        if (backText == "")
+            backText += "0"
+        else if (sym != backText.last()) {
             val last = backText.lastIndex
             if (backText[last] in '0'..'9') backText += sym
             else backText = backText.dropLast(1) + sym
@@ -119,43 +127,78 @@ class MainActivity : AppCompatActivity() {
     private fun calculate() {
         if (backText.last() !in '0'..'9')
             backText = backText.dropLast(1)
+        var n = 0
+        var firstIndex: Int
+        var lastIndex: Int
+        while (true) {
+            for (i in 0..backText.lastIndex)
+                if (backText[i] == '×' || backText[i] == '/') {
+                    n = 1
+                    firstIndex = 0
+                    lastIndex = backText.length
+                    back@ for (j in i + 1..backText.lastIndex)
+                        if (backText[j] !in '0'..'9') {
+                            lastIndex = j
+                            break@back
+                        }
+                    front@ for (j in i - 1 downTo 0)
+                        if (backText[j] !in '0'..'9') {
+                            firstIndex = j + 1
+                            break@front
+                        }
+                    cal(firstIndex, lastIndex)
+                }
+            if (n == 0)
+                break
+            n = 0
+        }
+        cal(0, backText.length)
+
+
+        if (backText.toFloat() - backText.toFloat().toInt() == 0F)
+            update(backText.toFloat().toInt().toString())
+        else
+            update(backText)
+    }
+
+    private fun cal(first: Int, last: Int) {
         var curr = 0F
         val i = 0
-        backText += " "
-        while (backText[i] in '0'..'9' || backText[i] == '.') {
-            cache += backText[i]
-            backText = backText.substring(i + 1)
+        var str = backText.substring(first, last) + " "
+        while (str[i] in '0'..'9' || str[i] == '.') {
+            cache += str[i]
+            str = str.substring(i + 1)
         }
         curr += cache.toFloat()
         cache = ""
-        while (backText != " ") {
-            when (backText[i]) {
+
+        while (str != " ") {
+            when (str[i]) {
                 '+' -> {
-                    backText = convert(backText)
+                    str = convert(str)
                     curr += cache.toFloat()
                 }
                 '-' -> {
-                    backText = convert(backText)
+                    str = convert(str)
                     curr -= cache.toFloat()
                 }
                 '×' -> {
-                    backText = convert(backText)
+
+                    str = convert(str)
                     curr *= cache.toFloat()
+
                 }
                 else -> {
-                    backText = convert(backText)
+                    str = convert(str)
                     curr /= cache.toFloat()
                 }
             }
             cache = ""
         }
-        // val text: TextView = findViewById(R.id.calc)
-        if (curr - curr.toInt() == 0F)
-            update(curr.toInt().toString())
-        else
-            update(curr.toString())
+        backText = backText.substring(0, first) + curr.toString() + backText.substring(last)
     }
 
+    // Method to convert sort string and extract numbers
     private fun convert(txt: String): String {
         var text = txt
         text = text.substring(1)
@@ -170,4 +213,10 @@ class MainActivity : AppCompatActivity() {
         binding.calc.text = a
         backText = binding.calc.text.toString()
     }
+    // Method to put button on vibrate when clicked
+    private fun vibrate() {
+        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        vibrator.vibrate(30)
+    }
+
 }

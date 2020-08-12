@@ -8,22 +8,22 @@
     </style>
 
     <style name="button_style">
-        <item name="android:layout_width">95dp</item>
-        <item name="android:layout_height">70dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@drawable/round_button</item>
         <item name="android:textSize">50dp</item>
         <item name="android:textColor">#FFFF</item>
     </style>
     <style name="key_style">
-        <item name="android:layout_width">95dp</item>
-        <item name="android:layout_height">70dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@drawable/round_keys</item>
         <item name="android:textSize">50dp</item>
         <item name="android:textColor">#000</item>
     </style>
     <style name="view_style">
-        <item name="android:layout_width">95dp</item>
-        <item name="android:layout_height">70dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@drawable/view</item>
         <item name="android:textSize">50dp</item>
         <item name="android:textColor">#000</item>

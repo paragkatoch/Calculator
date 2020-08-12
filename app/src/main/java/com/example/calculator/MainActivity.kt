@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Vibrator
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.example.calculator.databinding.ActivityMainBinding
@@ -17,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     private var backText: String = ""         //background string
     private var zero = false
     private var equal = false
+    private var stop = false
 
     // OnCreate Method
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +56,7 @@ class MainActivity : AppCompatActivity() {
     // Method to update backText and screen
     private fun operate(view: View) {
 
-        if (backText[0] == '0' && !zero) backText = ""
+        if ((backText[0] == '0' && !zero) || stop) {backText = ""; stop=false}
         when (view.id) {
             R.id.one -> digits("1")
             R.id.two -> digits("2")
@@ -102,6 +104,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
         equal = false
+        if(backText.length >=18) {
+            val toast = Toast.makeText(this,"Sorry limit exceeded",Toast.LENGTH_SHORT)
+            toast.show()
+            backText = backText.dropLast(1)
+        }
         // updates the screen
         update()
     }
@@ -130,32 +137,40 @@ class MainActivity : AppCompatActivity() {
         var n = 0
         var firstIndex: Int
         var lastIndex: Int
-        while (true) {
-            for (i in 0..backText.lastIndex)
-                if (backText[i] == '×' || backText[i] == '/') {
-                    n = 1
-                    firstIndex = 0
-                    lastIndex = backText.length
-                    back@ for (j in i + 1..backText.lastIndex)
-                        if (backText[j] !in '0'..'9' && backText[j] != '.') {
-                            lastIndex = j
-                            break@back
-                        }
-                    front@ for (j in i - 1 downTo 0)
-                        if (backText[j] !in '0'..'9' && backText[j] != '.') {
-                            firstIndex = j + 1
-                            break@front
-                        }
-                    cal(firstIndex, lastIndex)
+        try {
+            while (true) {
+                for (i in 0 until backText.lastIndex) {
+                    //println("$i,${backText.lastIndex},$backText")
+                    if (backText[i] == '×' || backText[i] == '/') {
+                        n = 1
+                        firstIndex = 0
+                        lastIndex = backText.length
+                        back@ for (j in i + 1..backText.lastIndex)
+                            if (backText[j] !in '0'..'9' && backText[j] != '.') {
+                                lastIndex = j
+                                break@back
+                            }
+                        front@ for (j in i - 1 downTo 0)
+                            if (backText[j] !in '0'..'9' && backText[j] != '.') {
+                                firstIndex = j + 1
+                                break@front
+                            }
+                        cal(firstIndex, lastIndex)
+                    }
                 }
-            if (n == 0)
-                break
-            n = 0
+                if (n == 0)
+                    break
+                n = 0
+            }
         }
+        catch (e: Exception){println(e)}
         cal(0, backText.length)
 
-
-        if (backText.toFloat() - backText.toFloat().toInt() == 0F)
+        if (backText.contains('E') || backText.contentEquals("Infinity")) {
+            update(backText.replace('E','e'))
+            stop = true
+        }
+        else if (backText.toFloat() - backText.toFloat().toInt() == 0F)
             update(backText.toFloat().toInt().toString())
         else
             update(backText)
@@ -166,7 +181,7 @@ class MainActivity : AppCompatActivity() {
         val i = 0
         var str = backText.substring(first, last) + " "
         println("str$str")
-        while (str[i] in '0'..'9' || str[i] == '.') {
+        while (str[i] in '0'..'9' || str[i] == '.' || str[i] == 'E') {
             cache += str[i]
             str = str.substring(i + 1)
         }

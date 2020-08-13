@@ -140,8 +140,7 @@ class MainActivity : AppCompatActivity() {
         try {
             while (true) {
                 for (i in 0 until backText.lastIndex) {
-                    //println("$i,${backText.lastIndex},$backText")
-                    if (backText[i] == '×' || backText[i] == '/') {
+                    if (backText[i] == '×' || backText[i] == '÷') {
                         n = 1
                         firstIndex = 0
                         lastIndex = backText.length

@@ -131,7 +131,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Method to calculate result and update the screen
-    private fun calculate() {
+    private fun calculate(dec: String = "%.4f") {
         if (backText.last() !in '0'..'9')
             backText = backText.dropLast(1)
         var n = 0
@@ -167,13 +167,15 @@ class MainActivity : AppCompatActivity() {
         cal(0, backText.length)
 
         if (backText.contains('E') || backText.contentEquals("Infinity")) {
-            update(backText.replace('E','e'))
+            update(backText)
             stop = true
         }
         else if (backText.toFloat() - backText.toFloat().toInt() == 0F)
+           // update()
             update(backText.toFloat().toInt().toString())
         else
-            update(backText)
+            update(String.format(dec, backText.toFloat()))
+
     }
 
     private fun cal(first: Int, last: Int) {
